@@ -18,6 +18,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 @RestControllerAdvice
 @Slf4j
@@ -31,6 +32,20 @@ public class GlobalExceptionHandler {
                                 FieldError::getField,
                                 FieldError::getDefaultMessage,
                                 (prevErr, newErr) -> prevErr + ", " + newErr)));
+    }
+
+    @ExceptionHandler(WebClientRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleWebClientError(WebClientRequestException ex, ServerHttpRequest req) {
+        log.error("Downstream connection falided at {}: {}", req.getPath(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiErrorResponse.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                        .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                        .message("Downstream microservice is unreachable")
+                        .path(req.getPath().value())
+                        .kind(ex.getClass().getSimpleName())
+                        .build());
     }
 
     @ExceptionHandler({ResourceNotFoundException.class})
