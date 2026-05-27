@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @AllArgsConstructor
@@ -33,8 +35,9 @@ public class StatusController {
     @GetMapping("/health/appointments")
     @Operation(
             summary = "Check the appointments-api health",
-            description = "Checks the Appointments-api microservice avaliability")
+            description = "Checks the Appointments API microservice avaliability")
     public Mono<Map> checkAppointmentsHealth() {
+        log.info("[checkAppointmentsHealth] Received request");
         return appointmentsClient.getHealth();
     }
 }
