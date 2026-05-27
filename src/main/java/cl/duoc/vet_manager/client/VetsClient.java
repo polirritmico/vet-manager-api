@@ -6,6 +6,14 @@
  */
 package cl.duoc.vet_manager.client;
 
+import cl.duoc.vet_manager.dto.vets.response.VeterinarioResponseDto;
+import java.util.List;
+import org.springframework.web.service.annotation.GetExchange;
+import reactor.core.publisher.Mono;
+
 public interface VetsClient {
     public static final String base = "/api/v1/pets";
+
+    @GetExchange(base)
+    Mono<List<VeterinarioResponseDto>> getAll();
 }
