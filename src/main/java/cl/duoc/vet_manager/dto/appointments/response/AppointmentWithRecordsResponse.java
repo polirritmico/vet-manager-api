@@ -4,7 +4,7 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.appointments.dto.response;
+package cl.duoc.vet_manager.dto.appointments.response;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -4,7 +4,7 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.vets_api.dto;
+package cl.duoc.vet_manager.dto.vets;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class DtoApiError {
-
     private LocalDate timestamp;
     private int status;
     private String error;

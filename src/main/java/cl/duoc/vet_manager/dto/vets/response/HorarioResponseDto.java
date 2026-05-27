@@ -4,9 +4,8 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.vets_api.dto.response;
+package cl.duoc.vet_manager.dto.vets.response;
 
-import cl.duoc.vets_api.model.DiasSemana;
 import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,9 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HorarioResponseDto {
-
     private Long id;
-    private DiasSemana dia;
+    private String dia;
     private LocalTime horaInicio;
     private LocalTime horaFin;
 }
