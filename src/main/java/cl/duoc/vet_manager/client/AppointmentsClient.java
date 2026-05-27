@@ -14,5 +14,5 @@ public interface AppointmentsClient {
     public static final String base = "/api/v1/appointments";
 
     @GetExchange("/api/v1/health")
-    Mono<Map> getHealth();
+    Mono<Map<String, String>> getHealth();
 }

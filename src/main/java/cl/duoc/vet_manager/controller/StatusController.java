@@ -36,7 +36,7 @@ public class StatusController {
     @Operation(
             summary = "Check the appointments-api health",
             description = "Checks the Appointments API microservice avaliability")
-    public Mono<Map> checkAppointmentsHealth() {
+    public Mono<Map<String, String>> checkAppointmentsHealth() {
         log.info("[checkAppointmentsHealth] Received request");
         return appointmentsClient.getHealth();
     }
