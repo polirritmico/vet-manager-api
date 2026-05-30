@@ -6,6 +6,7 @@
  */
 package cl.duoc.vet_manager.config;
 
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.rewritePath;
 import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.uri;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
@@ -45,6 +46,21 @@ public class GatewayConfig {
                         .build())
                 .and(route("vets_passthrough")
                         .route(path("/api/v1/vets/**"), http())
+                        .filter(uri(vetsBaseUrl))
+                        .build())
+                .and(route("appt_docs")
+                        .route(path("/appointments/v3/api-docs"), http())
+                        .before(rewritePath("/appointments/(?<segment>.*)", "/${segment}"))
+                        .filter(uri(apptsBaseUrl))
+                        .build())
+                .and(route("pets_docs")
+                        .route(path("/pets/v3/api-docs"), http())
+                        .before(rewritePath("/pets/(?<segment>.*)", "/${segment}"))
+                        .filter(uri(petsBaseUrl))
+                        .build())
+                .and(route("vets_docs")
+                        .route(path("/vets/v3/api-docs"), http())
+                        .before(rewritePath("/vets/(?<segment>.*)", "/${segment}"))
                         .filter(uri(vetsBaseUrl))
                         .build());
     }
