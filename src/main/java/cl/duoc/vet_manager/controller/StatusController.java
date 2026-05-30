@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
@@ -36,7 +35,7 @@ public class StatusController {
     @Operation(
             summary = "Check the appointments-api health",
             description = "Checks the Appointments API microservice avaliability")
-    public Mono<Map<String, String>> checkAppointmentsHealth() {
+    public Map<String, String> checkAppointmentsHealth() {
         log.info("[checkAppointmentsHealth] Received request");
         return appointmentsClient.getHealth();
     }

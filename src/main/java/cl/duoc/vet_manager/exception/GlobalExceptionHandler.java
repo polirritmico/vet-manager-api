@@ -7,24 +7,23 @@
 package cl.duoc.vet_manager.exception;
 
 import cl.duoc.vet_manager.exception.dto.ApiErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    @ExceptionHandler(WebExchangeBindException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(WebExchangeBindException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
         log.error("Param validation failed: {}", ex);
         return ResponseEntity.badRequest()
                 .body(ex.getBindingResult().getFieldErrors().stream()
@@ -34,30 +33,16 @@ public class GlobalExceptionHandler {
                                 (prevErr, newErr) -> prevErr + ", " + newErr)));
     }
 
-    @ExceptionHandler(WebClientRequestException.class)
-    public ResponseEntity<ApiErrorResponse> handleWebClientError(WebClientRequestException ex, ServerHttpRequest req) {
-        log.error("Downstream connection falided at {}: {}", req.getPath(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(ApiErrorResponse.builder()
-                        .timestamp(LocalDateTime.now())
-                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())
-                        .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-                        .message("Downstream microservice is unreachable")
-                        .path(req.getPath().value())
-                        .kind(ex.getClass().getSimpleName())
-                        .build());
-    }
-
     @ExceptionHandler({ResourceNotFoundException.class})
-    public ResponseEntity<ApiErrorResponse> handleNotFound(RuntimeException ex, ServerHttpRequest req) {
-        log.error("Resource not found at {}: {}", req.getPath().value(), ex.getMessage(), ex);
+    public ResponseEntity<ApiErrorResponse> handleNotFound(RuntimeException ex, HttpServletRequest req) {
+        log.error("Resource not found at {}: {}", req.getRequestURI(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiErrorResponse.builder()
                         .timestamp(LocalDateTime.now())
                         .status(HttpStatus.NOT_FOUND.value())
                         .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                         .message(ex.getMessage())
-                        .path(req.getPath().value())
+                        .path(req.getRequestURI())
                         .kind(ex.getClass().getSimpleName())
                         .build());
     }

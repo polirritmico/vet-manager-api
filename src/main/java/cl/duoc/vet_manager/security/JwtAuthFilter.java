@@ -9,21 +9,21 @@ package cl.duoc.vet_manager.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class ReactiveJwtAuthFilter implements WebFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
     private final String BEARER = "Bearer ";
 
     @Value("${jwt.secret}")
@@ -33,10 +33,12 @@ public class ReactiveJwtAuthFilter implements WebFilter {
     private String issuer;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String header = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filter)
+            throws ServletException, IOException {
+        String header = req.getHeader("Authorization");
         if (header == null || !header.startsWith(BEARER)) {
-            return chain.filter(exchange);
+            filter.doFilter(req, res);
+            return;
         }
 
         try {
@@ -52,13 +54,15 @@ public class ReactiveJwtAuthFilter implements WebFilter {
                     ? List.of()
                     : roles.stream().map(SimpleGrantedAuthority::new).toList();
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(username, token, authorities);
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-            return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
         } catch (Exception err) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        filter.doFilter(req, res);
     }
 }

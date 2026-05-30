@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/v1/vet-manager")
@@ -28,15 +27,15 @@ import reactor.core.publisher.Mono;
         name = "VetManager",
         description = "Provides advanced use cases through the orchestration of multiple microservices.")
 public class VetManagerController {
-    private VetManagerService service;
+    private final VetManagerService service;
 
     @PostMapping("appointments/availability")
     @Operation(
             summary = "Show avaliable hours",
             description = "Check the professionals availability for the date range")
-    public Mono<ResponseEntity<List<AvailabilityResponse>>> showAvaliableHours(
+    public ResponseEntity<List<AvailabilityResponse>> showAvaliableHours(
             @Valid @RequestBody ScheduleAvailabilityReq req) {
 
-        return service.getAvailableScheduleHoursUseCase(req).map(ResponseEntity::ok);
+        return ResponseEntity.ok(service.getAvailableScheduleHoursUseCase(req));
     }
 }

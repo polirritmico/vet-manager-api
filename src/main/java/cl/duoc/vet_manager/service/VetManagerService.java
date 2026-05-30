@@ -19,7 +19,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +27,15 @@ public class VetManagerService {
     private final VetsClient vetsClient;
     private final AppointmentsClient appointmentsClient;
 
-    public Mono<List<AvailabilityResponse>> getAvailableScheduleHoursUseCase(ScheduleAvailabilityReq req) {
+    public List<AvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityReq req) {
         int duration = (req.getSlotDurationMinutes() != null) ? req.getSlotDurationMinutes() : 15;
 
-        return vetsClient.getAll().flatMap(vets -> {
-            List<Long> vetIds = vets.stream().map(VeterinarioResponseDto::getId).toList();
+        List<VeterinarioResponseDto> vets = vetsClient.getAll();
+        List<Long> vetIds = vets.stream().map(VeterinarioResponseDto::getId).toList();
 
-            return appointmentsClient
-                    .getBaselineSchedules(vetIds, req.getDate())
-                    .map(appointments -> buildAvailabilityList(vets, appointments, req, duration));
-        });
+        List<AppointmentResponse> appointments = appointmentsClient.getBaselineSchedules(vetIds, req.getDate());
+
+        return buildAvailabilityList(vets, appointments, req, duration);
     }
 
     private List<AvailabilityResponse> buildAvailabilityList(
