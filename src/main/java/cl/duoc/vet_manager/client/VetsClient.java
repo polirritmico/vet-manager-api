@@ -7,12 +7,20 @@
 package cl.duoc.vet_manager.client;
 
 import cl.duoc.vet_manager.dto.vets.response.VeterinarioResponseDto;
+import cl.duoc.vet_manager.model.VetWorkingSchedule;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 public interface VetsClient {
-    public static final String base = "/api/v1/pets";
+    String base = "/api/v1/pets";
 
     @GetExchange(base)
     List<VeterinarioResponseDto> getAll();
+
+    @GetExchange(base + "/schedules")
+    List<VetWorkingSchedule> getDayWorkingSchedules(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 }

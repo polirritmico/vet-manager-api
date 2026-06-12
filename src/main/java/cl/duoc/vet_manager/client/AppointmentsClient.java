@@ -7,19 +7,29 @@
 package cl.duoc.vet_manager.client;
 
 import cl.duoc.vet_manager.dto.appointments.response.AppointmentResponse;
+import cl.duoc.vet_manager.model.VetWorkingSchedule.VetId;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 public interface AppointmentsClient {
-    public static final String base = "/api/v1/appointments";
+    final String base = "/api/v1/appointments";
 
     @GetExchange("/api/v1/health")
     Map<String, String> getHealth();
 
+    default List<AppointmentResponse> getScheduledAppointments(List<VetId> professionalIds, LocalDate date) {
+        List<Long> ids = professionalIds == null
+                ? List.of()
+                : professionalIds.stream().map(VetId::value).toList();
+        return getScheduledAppointmentsRequest(ids, date);
+    }
+
     @GetExchange(base + "/schedules")
-    List<AppointmentResponse> getBaselineSchedules(
-            @RequestParam("professionalIds") List<Long> professionalIds, @RequestParam("date") LocalDate date);
+    List<AppointmentResponse> getScheduledAppointmentsRequest(
+            @RequestParam("professionalIds") List<Long> professionalIds,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 }
