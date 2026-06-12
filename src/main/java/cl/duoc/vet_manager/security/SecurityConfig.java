@@ -6,6 +6,7 @@
  */
 package cl.duoc.vet_manager.security;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,8 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(publicPaths)
+                        .permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
