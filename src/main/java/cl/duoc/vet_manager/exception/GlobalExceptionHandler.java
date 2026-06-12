@@ -18,6 +18,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 
 @RestControllerAdvice
 @Slf4j
@@ -42,6 +43,21 @@ public class GlobalExceptionHandler {
                         .status(HttpStatus.NOT_FOUND.value())
                         .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                         .message(ex.getMessage())
+                        .path(req.getRequestURI())
+                        .kind(ex.getClass().getSimpleName())
+                        .build());
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleResourceAccessException(
+            ResourceAccessException ex, HttpServletRequest req) {
+        log.error("Downstream service unreachable at {}: {}", req.getRequestURI(), ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiErrorResponse.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                        .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                        .message("A required downstream service is unreachable") // avoid ex.getMessage for security
                         .path(req.getRequestURI())
                         .kind(ex.getClass().getSimpleName())
                         .build());
