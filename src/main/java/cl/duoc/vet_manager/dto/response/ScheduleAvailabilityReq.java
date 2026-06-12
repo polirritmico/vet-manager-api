@@ -12,6 +12,7 @@ import lombok.Data;
 
 @Data
 public class ScheduleAvailabilityReq {
+    private Long customerId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
