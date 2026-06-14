@@ -234,4 +234,24 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>debug</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<configuration>
+							<jvmArguments>
+								--enable-native-access=ALL-UNNAMED
+								-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+							</jvmArguments>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
