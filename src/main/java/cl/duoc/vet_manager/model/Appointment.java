@@ -6,27 +6,31 @@
  */
 package cl.duoc.vet_manager.model;
 
-import java.time.LocalDateTime;
+import cl.duoc.vet_manager.model.VetWorkingSchedule.VetId;
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.time.LocalTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Appointment {
-    public record ApptId(Long value) {
+    public record ApptId(@JsonValue Long value) {
         public ApptId {
             java.util.Objects.requireNonNull(value);
         }
     }
 
     private ApptId id;
+    private VetId professionalId;
     private Long clientId;
     private Long petId;
-    private Long professionalId;
-    private LocalDateTime scheduleAt;
-    private LocalDateTime endScheduleAt;
+    private LocalTime scheduleAt;
+    private LocalTime endScheduleAt;
     // private String status;
     // private LocalDateTime createdAt;
     // private LocalDateTime updatedAt;

@@ -6,11 +6,10 @@
  */
 package cl.duoc.vet_manager.controller;
 
+import cl.duoc.vet_manager.api.VetManagerApi;
+import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityReq;
 import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
-import cl.duoc.vet_manager.dto.response.ScheduleAvailabilityReq;
 import cl.duoc.vet_manager.service.VetManagerService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/vet-manager")
 @RequiredArgsConstructor
-@Tag(
-        name = "VetManager",
-        description = "Provides advanced use cases through the orchestration of multiple microservices.")
-public class VetManagerController {
+public class VetManagerController implements VetManagerApi {
     private final VetManagerService service;
 
     @PostMapping("appointments/availability")
-    @Operation(
-            summary = "Show avaliable hours",
-            description = "Check the professionals availability for the date range")
     public ResponseEntity<List<AvailabilityResponse>> showAvaliableHours(
             @Valid @RequestBody ScheduleAvailabilityReq req) {
 

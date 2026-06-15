@@ -7,6 +7,7 @@
 package cl.duoc.vet_manager.controller;
 
 import cl.duoc.vet_manager.client.AppointmentsClient;
+import cl.duoc.vet_manager.client.VetsClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "System", description = "Service monitoring & status")
 public class StatusController {
     private final AppointmentsClient appointmentsClient;
+    private final VetsClient vetsClient;
 
     @GetMapping("/health")
     @Operation(summary = "Check service health", description = "Checks the microservice avaliability")
@@ -38,5 +40,12 @@ public class StatusController {
     public Map<String, String> checkAppointmentsHealth() {
         log.info("[checkAppointmentsHealth] Received request");
         return appointmentsClient.getHealth();
+    }
+
+    @GetMapping("/health/vets")
+    @Operation(summary = "Check the vets-api health", description = "Checks the Vets API microservice avaliability")
+    public Map<String, String> checkVetHealth() {
+        log.info("[checkAppointmentsHealth] Received request");
+        return vetsClient.getHealth();
     }
 }

@@ -10,12 +10,16 @@ import cl.duoc.vet_manager.dto.vets.response.VeterinarioResponseDto;
 import cl.duoc.vet_manager.model.VetWorkingSchedule;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 public interface VetsClient {
-    String base = "/api/v1/pets";
+    String base = "/api/v1/vets";
+
+    @GetExchange("/api/v1/health")
+    Map<String, String> getHealth();
 
     @GetExchange(base)
     List<VeterinarioResponseDto> getAll();

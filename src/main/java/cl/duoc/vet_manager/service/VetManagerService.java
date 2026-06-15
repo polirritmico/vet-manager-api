@@ -8,11 +8,14 @@ package cl.duoc.vet_manager.service;
 
 import cl.duoc.vet_manager.client.AppointmentsClient;
 import cl.duoc.vet_manager.client.VetsClient;
-import cl.duoc.vet_manager.dto.appointments.response.AppointmentResponse;
+import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityReq;
 import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
-import cl.duoc.vet_manager.dto.response.ScheduleAvailabilityReq;
 import cl.duoc.vet_manager.dto.response.TimeSlot;
-import cl.duoc.vet_manager.dto.vets.response.VeterinarioResponseDto;
+import cl.duoc.vet_manager.mapper.DtoModelMapper;
+import cl.duoc.vet_manager.model.Appointment;
+import cl.duoc.vet_manager.model.StoreSchedule;
+import cl.duoc.vet_manager.model.VetWorkingSchedule;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,97 +28,81 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class VetManagerService {
     private final VetsClient vetsClient;
-    private final AppointmentsClient appointmentsClient;
+    private final AppointmentsClient apptsClient;
+    private final DtoModelMapper mapper;
 
     public List<AvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityReq req) {
-        int duration = (req.getSlotDurationMinutes() != null) ? req.getSlotDurationMinutes() : 15;
+        int slot = req.getSlotDurationMinutes();
+        LocalTime from = roundUpToSlot(req.getStartTime(), slot);
+        LocalTime until = roundUpToSlot(req.getEndTime(), slot);
+        LocalDate date = req.getDate();
 
-        List<VeterinarioResponseDto> vets = vetsClient.getAll();
-        List<Long> vetIds = vets.stream().map(VeterinarioResponseDto::getId).toList();
+        StoreSchedule schedule = buildStoreSchedule(vetsClient.getDayWorkingSchedules(date), slot);
+        List<Appointment> appts = mapper.toAppointments(apptsClient.getScheduledAppointments(schedule.vetIds(), date));
 
-        List<AppointmentResponse> appointments = appointmentsClient.getBaselineSchedules(vetIds, req.getDate());
-
-        return buildAvailabilityList(vets, appointments, req, duration);
+        return mapper.toAvailabilityResponse(buildAvailabilityList(from, until, slot, appts, schedule));
     }
 
-    private List<AvailabilityResponse> buildAvailabilityList(
-            List<VeterinarioResponseDto> allVets,
-            List<AppointmentResponse> allAppointments,
-            ScheduleAvailabilityReq req,
-            int duration) {
-
-        String targetDay = req.getDate().getDayOfWeek().name();
-
-        return allVets.stream()
-                .map(vet -> {
-                    List<TimeSlot> freeSlots = calculateVetFreeSlots(vet, allAppointments, targetDay, req, duration);
-                    return AvailabilityResponse.builder()
-                            .professionalId(vet.getId())
-                            .professionalName(vet.getNombreCompleto() + " " + vet.getApellidos())
-                            .availableSlots(freeSlots)
-                            .build();
-                })
-                .toList();
-    }
-
-    private List<TimeSlot> calculateVetFreeSlots(
-            VeterinarioResponseDto vet,
-            List<AppointmentResponse> allAppointments,
-            String targetDay,
-            ScheduleAvailabilityReq req,
-            int duration) {
-
-        return vet.getHorarioVeterinario().stream()
-                .filter(shift -> shift.getDia().equalsIgnoreCase(targetDay))
-                .findFirst()
-                .map(shift -> {
-                    List<AppointmentResponse> vetAppointments = allAppointments.stream()
-                            .filter(app -> app.getProfessionalId().equals(vet.getId()))
-                            .filter(app -> !"CANCELLED".equalsIgnoreCase(app.getStatus()))
-                            .toList();
-
-                    LocalTime effectiveStart = req.getStartTime().isAfter(shift.getHoraInicio())
-                            ? req.getStartTime()
-                            : shift.getHoraInicio();
-                    LocalTime effectiveEnd =
-                            req.getEndTime().isBefore(shift.getHoraFin()) ? req.getEndTime() : shift.getHoraFin();
-
-                    return extractFreeBlocks(effectiveStart, effectiveEnd, vetAppointments, duration);
-                })
-                .orElse(List.of());
-    }
-
-    private List<TimeSlot> extractFreeBlocks(
-            LocalTime start, LocalTime end, List<AppointmentResponse> booked, int durationMinutes) {
-        List<TimeSlot> freeSlots = new ArrayList<>();
-
-        if (start.isAfter(end) || start.equals(end)) {
-            return freeSlots;
+    private StoreSchedule buildStoreSchedule(List<VetWorkingSchedule> vetSchedules, int slotDuration) {
+        StoreSchedule schedule = new StoreSchedule();
+        for (VetWorkingSchedule vetSchedule : vetSchedules) {
+            schedule.set(
+                    vetSchedule.getId(),
+                    generateTimeSlotsRange(vetSchedule.getFromTime(), vetSchedule.getUntilTime(), slotDuration));
         }
+        return schedule;
+    }
 
-        LocalTime currentSlotStart = start;
+    private List<TimeSlot> generateTimeSlotsRange(LocalTime from, LocalTime until, int slotMinutes) {
+        List<TimeSlot> slots = new ArrayList<>();
+        for (LocalTime start = from, end = start.plusMinutes(slotMinutes);
+                !end.isAfter(until);
+                start = end, end = end.plusMinutes(slotMinutes)) {
+            slots.add(new TimeSlot(start, end));
+        }
+        return slots;
+    }
 
-        while (!currentSlotStart.plusMinutes(durationMinutes).isAfter(end)) {
-            LocalTime currentSlotEnd = currentSlotStart.plusMinutes(durationMinutes);
+    private LocalTime roundUpToSlot(LocalTime time, int slotDurationMinutes) {
+        int minutes = time.getMinute();
+        int remainder = minutes % slotDurationMinutes;
+        if (remainder == 0) {
+            return time.withSecond(0).withNano(0);
+        }
+        return time.plusMinutes(slotDurationMinutes - remainder).withSecond(0).withNano(0);
+    }
 
-            final LocalTime checkStart = currentSlotStart;
-            final LocalTime checkEnd = currentSlotEnd;
+    private StoreSchedule buildAvailabilityList(
+            LocalTime startTime,
+            LocalTime endTime,
+            int slotDuration,
+            List<Appointment> currentAppts,
+            StoreSchedule schedule) {
 
-            boolean isBooked = booked.stream().anyMatch(app -> {
-                LocalTime appStart = app.getScheduleAt().toLocalTime();
-                LocalTime appEnd = app.getEndScheduleAt().toLocalTime();
-                return checkStart.isBefore(appEnd) && checkEnd.isAfter(appStart);
-            });
-
-            if (!isBooked) {
-                freeSlots.add(TimeSlot.builder()
-                        .startTime(currentSlotStart)
-                        .endTime(currentSlotEnd)
-                        .build());
+        for (LocalTime from = startTime; from.isBefore(endTime); from = from.plusMinutes(slotDuration)) {
+            LocalTime until = from.plusMinutes(slotDuration);
+            if (until.isAfter(endTime)) {
+                break;
             }
-            currentSlotStart = currentSlotEnd;
+
+            List<Appointment> appts = getAppointmentsAtTime(startTime, endTime, currentAppts);
+
+            // for (Appointment appt : currentAppts) {
+            //     if (!isAvailable(from, until, appt)) {
+            //         continue;
+            //     }
+            //
+            //     TimeSlot slot = new TimeSlot(from, until);
+            //     vetSchedules
+            //             .computeIfAbsent(appt.getProfessionalId(), k -> new ArrayList<>())
+            //             .add(slot);
+            // }
         }
 
-        return freeSlots;
+        return mapper.toAvailabilityResponse(vetSchedules);
     }
+
+    // private boolean isAvailable(LocalTime from, LocalTime until, Appointment appt) {
+    //     return from.isBefore(appt.getEndScheduleAt()) && until.isAfter(appt.getScheduleAt());
+    // }
 }

@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AvailabilityResponse {
     private Long professionalId;
-    private String professionalName;
+    // private String professionalName;
     private List<TimeSlot> availableSlots;
 }

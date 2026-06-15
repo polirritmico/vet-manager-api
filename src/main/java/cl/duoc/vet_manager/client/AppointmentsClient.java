@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 public interface AppointmentsClient {
-    final String base = "/api/v1/appointments";
+    String base = "/api/v1/appointments";
 
     @GetExchange("/api/v1/health")
     Map<String, String> getHealth();
@@ -25,11 +25,11 @@ public interface AppointmentsClient {
         List<Long> ids = professionalIds == null
                 ? List.of()
                 : professionalIds.stream().map(VetId::value).toList();
-        return getScheduledAppointmentsRequest(ids, date);
+        return getSchedulesForProfessionals(ids, date);
     }
 
     @GetExchange(base + "/schedules")
-    List<AppointmentResponse> getScheduledAppointmentsRequest(
+    List<AppointmentResponse> getSchedulesForProfessionals(
             @RequestParam("professionalIds") List<Long> professionalIds,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 }
