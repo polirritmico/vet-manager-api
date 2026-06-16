@@ -31,7 +31,4 @@ public class Appointment {
     private Long petId;
     private LocalTime scheduleAt;
     private LocalTime endScheduleAt;
-    // private String status;
-    // private LocalDateTime createdAt;
-    // private LocalDateTime updatedAt;
 }

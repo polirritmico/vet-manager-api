@@ -8,12 +8,13 @@ package cl.duoc.vet_manager.model;
 
 import cl.duoc.vet_manager.dto.response.TimeSlot;
 import cl.duoc.vet_manager.model.VetWorkingSchedule.VetId;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StoreSchedule {
+public class ClinicSchedule {
     private final Map<VetId, List<TimeSlot>> schedules = new HashMap<>();
 
     public List<TimeSlot> get(VetId vetId) {
@@ -34,5 +35,14 @@ public class StoreSchedule {
 
     public void set(VetId vetId, List<TimeSlot> slots) {
         schedules.put(vetId, slots);
+    }
+
+    public void removeTimeSlotRange(VetId vetId, LocalTime from, LocalTime until) {
+        List<TimeSlot> slots = schedules.get(vetId);
+        if (slots == null) {
+            return;
+        }
+        slots.removeIf(
+                slot -> slot.getStartTime().isBefore(until) && slot.getEndTime().isAfter(from));
     }
 }
