@@ -26,6 +26,9 @@ public class VetWorkingSchedule {
     @JsonProperty("vetId")
     private VetId id;
 
+    @JsonProperty("vetNombre")
+    private String name;
+
     @JsonProperty("horaInicio")
     private LocalTime fromTime;
 

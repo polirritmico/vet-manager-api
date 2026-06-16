@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AvailabilityResponse {
+public class SearchAvailabilityResponse {
     private Long professionalId;
     private String professionalName;
     private List<TimeSlot> availableSlots;

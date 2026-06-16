@@ -26,7 +26,7 @@ public class Appointment {
     }
 
     private ApptId id;
-    private VetId professionalId;
+    private VetId vetId;
     private Long clientId;
     private Long petId;
     private LocalTime scheduleAt;

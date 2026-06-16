@@ -6,7 +6,7 @@
  */
 package cl.duoc.vet_manager.api;
 
-import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityReq;
+import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityRequest;
 import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,5 +28,5 @@ public interface VetManagerApi {
             description = "Return a list of available appointment slots.",
             content = @Content)
     @ApiResponse(responseCode = "403", description = "Invalid credentials or account revoked", content = @Content)
-    public ResponseEntity<List<AvailabilityResponse>> showAvaliableHours(ScheduleAvailabilityReq req);
+    public ResponseEntity<List<AvailabilityResponse>> showAvaliableHours(ScheduleAvailabilityRequest req);
 }

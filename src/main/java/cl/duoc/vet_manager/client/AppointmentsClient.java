@@ -7,6 +7,8 @@
 package cl.duoc.vet_manager.client;
 
 import cl.duoc.vet_manager.dto.appointments.response.AppointmentResponse;
+import cl.duoc.vet_manager.dto.request.SearchAvailabilityRequest;
+import cl.duoc.vet_manager.dto.response.SearchAvailabilityResponse;
 import cl.duoc.vet_manager.model.VetWorkingSchedule.VetId;
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 public interface AppointmentsClient {
     String base = "/api/v1/appointments";
@@ -32,4 +35,7 @@ public interface AppointmentsClient {
     List<AppointmentResponse> getSchedulesForProfessionals(
             @RequestParam("professionalIds") List<Long> professionalIds,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
+
+    @PostExchange(base + "/schedules")
+    List<SearchAvailabilityResponse> searchAvailability(SearchAvailabilityRequest req);
 }

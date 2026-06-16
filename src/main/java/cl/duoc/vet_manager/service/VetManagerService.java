@@ -8,12 +8,12 @@ package cl.duoc.vet_manager.service;
 
 import cl.duoc.vet_manager.client.AppointmentsClient;
 import cl.duoc.vet_manager.client.VetsClient;
-import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityReq;
+import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityRequest;
+import cl.duoc.vet_manager.dto.request.SearchAvailabilityRequest;
 import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
+import cl.duoc.vet_manager.dto.response.SearchAvailabilityResponse;
 import cl.duoc.vet_manager.mapper.DtoModelMapper;
-import cl.duoc.vet_manager.model.ClinicSchedule;
 import cl.duoc.vet_manager.model.VetWorkingSchedule;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +27,11 @@ public class VetManagerService {
     private final AppointmentsClient apptsClient;
     private final DtoModelMapper mapper;
 
-    public List<AvailabilityResponse> getAvailableScheduleHoursUseCaseB(ScheduleAvailabilityReq req) {
-        LocalDate date = req.getDate();
+    public List<AvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityRequest req) {
+        List<VetWorkingSchedule> vetSchedules = vetsClient.getDayWorkingSchedules(req.getDate());
+        SearchAvailabilityRequest searchAvailabilityRequest = mapper.toSearchAvailabilityRequest(req, vetSchedules);
 
-        List<VetWorkingSchedule> vetSchedules = vetsClient.getDayWorkingSchedules(date);
-        SlotsAvailabilityRequest slotsAvailabilityRequest = mapper.toSlotsAvailabilityRequest(req, vetSchedules);
-        List<ClinicSchedule> availabilitySchedule = apptsClient.searchAvailability(slotsAvailabilityRequest);
-
-        return mapper.toAvailabilityResponse(availabilitySchedule);
+        List<SearchAvailabilityResponse> res = apptsClient.searchAvailability(searchAvailabilityRequest);
+        return mapper.toAvailabilityResponse(res);
     }
 }

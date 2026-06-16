@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(name = "ScheduleAvailabilityRequest", description = "Payload to search schedule availability")
-public class ScheduleAvailabilityReq {
+public class ScheduleAvailabilityRequest {
     @NotNull
     @Schema(description = "Customer identifier", example = "1", requiredMode = RequiredMode.REQUIRED)
     private Long customerId;
