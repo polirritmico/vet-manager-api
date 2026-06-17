@@ -10,7 +10,6 @@ import cl.duoc.vet_manager.client.AppointmentsClient;
 import cl.duoc.vet_manager.client.VetsClient;
 import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityRequest;
 import cl.duoc.vet_manager.dto.request.SearchAvailabilityRequest;
-import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
 import cl.duoc.vet_manager.dto.response.SearchAvailabilityResponse;
 import cl.duoc.vet_manager.mapper.DtoModelMapper;
 import cl.duoc.vet_manager.model.VetWorkingSchedule;
@@ -27,11 +26,10 @@ public class VetManagerService {
     private final AppointmentsClient apptsClient;
     private final DtoModelMapper mapper;
 
-    public List<AvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityRequest req) {
+    public List<SearchAvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityRequest req) {
         List<VetWorkingSchedule> vetSchedules = vetsClient.getDayWorkingSchedules(req.getDate());
         SearchAvailabilityRequest searchAvailabilityRequest = mapper.toSearchAvailabilityRequest(req, vetSchedules);
-
-        List<SearchAvailabilityResponse> res = apptsClient.searchAvailability(searchAvailabilityRequest);
-        return mapper.toAvailabilityResponse(res);
+        List<SearchAvailabilityResponse> response = apptsClient.searchAvailability(searchAvailabilityRequest);
+        return response;
     }
 }
