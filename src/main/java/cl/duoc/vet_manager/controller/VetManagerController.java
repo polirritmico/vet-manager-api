@@ -8,7 +8,7 @@ package cl.duoc.vet_manager.controller;
 
 import cl.duoc.vet_manager.api.VetManagerApi;
 import cl.duoc.vet_manager.dto.request.ScheduleAvailabilityRequest;
-import cl.duoc.vet_manager.dto.response.AvailabilityResponse;
+import cl.duoc.vet_manager.dto.response.SearchAvailabilityResponse;
 import cl.duoc.vet_manager.service.VetManagerService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -26,7 +26,7 @@ public class VetManagerController implements VetManagerApi {
     private final VetManagerService service;
 
     @PostMapping("appointments/availability")
-    public ResponseEntity<List<AvailabilityResponse>> showAvaliableHours(
+    public ResponseEntity<List<SearchAvailabilityResponse>> showAvaliableHours(
             @Valid @RequestBody ScheduleAvailabilityRequest req) {
 
         return ResponseEntity.ok(service.getAvailableScheduleHoursUseCase(req));
