@@ -27,7 +27,7 @@ public class ScheduleAvailabilityRequest {
 
     @NotNull(message = "La fecha es obligatoria")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Schema(description = "Search date (yyyy-MM-dd)", example = "2026-06-16", requiredMode = RequiredMode.REQUIRED)
+    @Schema(description = "Search date (yyyy-MM-dd)", example = "2030-06-18", requiredMode = RequiredMode.REQUIRED)
     private LocalDate date;
 
     @NotNull(message = "El tiempo de inicio es obligatorio")
