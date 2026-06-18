@@ -11,6 +11,7 @@ import cl.duoc.vet_manager.client.PetsClient;
 import cl.duoc.vet_manager.client.VetsClient;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
+@Slf4j
 @Configuration
 public class RestClientConfig {
 
@@ -45,6 +47,10 @@ public class RestClientConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .requestInterceptor(tokenPropagationInterceptor())
+                .requestInterceptor((request, body, execution) -> {
+                    log.debug("Request: {} {} | Body: {}", request.getMethod(), request.getURI(), new String(body));
+                    return execution.execute(request, body);
+                })
                 .build();
 
         return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client))
