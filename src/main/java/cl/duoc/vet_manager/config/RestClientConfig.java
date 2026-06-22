@@ -11,8 +11,10 @@ import cl.duoc.vet_manager.client.PetsClient;
 import cl.duoc.vet_manager.client.VetsClient;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -41,8 +43,14 @@ public class RestClientConfig {
     private String vetsBaseUrl;
 
     @Bean
+    @LoadBalanced
+    public RestClient.Builder loadBalancedRestClientBuilder() {
+        return RestClient.builder();
+    }
+
+    @Bean
     public AppointmentsClient appointmentsClient() {
-        RestClient client = RestClient.builder()
+        RestClient client = resolveBuilder(appointmentsBaseUrl)
                 .baseUrl(appointmentsBaseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -60,7 +68,7 @@ public class RestClientConfig {
 
     @Bean
     public PetsClient petsClient() {
-        RestClient client = RestClient.builder()
+        RestClient client = resolveBuilder(petsBaseUrl)
                 .baseUrl(petsBaseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -74,7 +82,7 @@ public class RestClientConfig {
 
     @Bean
     public VetsClient vetsClient() {
-        RestClient client = RestClient.builder()
+        RestClient client = resolveBuilder(vetsBaseUrl)
                 .baseUrl(vetsBaseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -102,5 +110,28 @@ public class RestClientConfig {
                 return execution.execute(request, body);
             }
         };
+    }
+
+    private RestClient.Builder resolveBuilder(String url) {
+        return isLocalURL(url)
+                ? RestClient.builder()
+                : loadBalancedRestClientBuilder().clone();
+    }
+
+    private boolean isLocalURL(String url) {
+        if (url == null || url.isBlank()) {
+            return false;
+        }
+
+        try {
+            String host = URI.create(url).getHost();
+            return host != null
+                    && (host.equalsIgnoreCase("localhost")
+                            || host.equals("127.0.0.1")
+                            || host.equals("[::1]")
+                            || host.equals("0:0:0:0:0:0:0:1"));
+        } catch (IllegalArgumentException err) {
+            return false;
+        }
     }
 }
