@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -41,6 +42,12 @@ public class RestClientConfig {
 
     @Value("${app.service.vets.base-url}")
     private String vetsBaseUrl;
+
+    @Bean
+    @Primary
+    public RestClient.Builder defaultRestClientBuilder() {
+        return RestClient.builder();
+    }
 
     @Bean
     @LoadBalanced
