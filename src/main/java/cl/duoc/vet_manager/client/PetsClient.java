@@ -6,7 +6,7 @@
  */
 package cl.duoc.vet_manager.client;
 
-import cl.duoc.vet_manager.dto.pets.response.MascotaResponseDTO;
+import cl.duoc.vet_manager.dto.response.pets.MascotaResponseDTO;
 import java.util.List;
 import org.springframework.web.service.annotation.GetExchange;
 

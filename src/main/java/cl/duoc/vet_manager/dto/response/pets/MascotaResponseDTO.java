@@ -4,7 +4,7 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.vet_manager.dto.pets.request;
+package cl.duoc.vet_manager.dto.response.pets;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MascotaRequestDTO {
+public class MascotaResponseDTO {
+    private Long id;
     private String nombreMascota;
     private LocalDate fechaNacimientoMascota;
     private Boolean esDocilBoolean;
-    private Long idRaza;
+    private RazaResponseDTO razaResponse;
     private Long idCliente;
 }

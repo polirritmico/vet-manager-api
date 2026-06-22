@@ -6,7 +6,7 @@
  */
 package cl.duoc.vet_manager.client;
 
-import cl.duoc.vet_manager.dto.vets.response.VeterinarioResponseDto;
+import cl.duoc.vet_manager.dto.response.vets.VeterinarioResponseDTO;
 import cl.duoc.vet_manager.model.VetWorkingSchedule;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,7 +22,7 @@ public interface VetsClient {
     Map<String, String> getHealth();
 
     @GetExchange(base)
-    List<VeterinarioResponseDto> getAll();
+    List<VeterinarioResponseDTO> getAll();
 
     @GetExchange(base + "/schedules")
     List<VetWorkingSchedule> getDayWorkingSchedules(

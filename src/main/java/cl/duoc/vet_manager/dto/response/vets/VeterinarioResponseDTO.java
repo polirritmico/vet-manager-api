@@ -4,7 +4,7 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.vet_manager.dto.vets.response;
+package cl.duoc.vet_manager.dto.response.vets;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VeterinarioResponseDto {
+public class VeterinarioResponseDTO {
     private Long id;
     private String nombreCompleto;
     private String apellidos;
@@ -22,5 +22,5 @@ public class VeterinarioResponseDto {
     private String email;
     private Integer edad;
     private String numeroRegistroProfesional;
-    private List<HorarioResponseDto> horarioVeterinario;
+    private List<HorarioResponseDTO> horarioVeterinario;
 }

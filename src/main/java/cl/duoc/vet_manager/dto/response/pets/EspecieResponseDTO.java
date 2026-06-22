@@ -4,19 +4,18 @@
  * Rodrigo Callealta
  * Fernando Villalobos
  */
-package cl.duoc.vet_manager.dto.vets.response;
+package cl.duoc.vet_manager.dto.response.pets;
 
-import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class HorarioResponseDto {
+@NoArgsConstructor
+public class EspecieResponseDTO {
     private Long id;
-    private String dia;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
+    private String nombreEspecie;
+    private String descripcionEspecie;
+    private Boolean exoticaBoolean;
 }
