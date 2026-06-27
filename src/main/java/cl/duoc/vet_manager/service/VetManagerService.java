@@ -27,9 +27,17 @@ public class VetManagerService {
     private final DtoModelMapper mapper;
 
     public List<SearchAvailabilityResponse> getAvailableScheduleHoursUseCase(ScheduleAvailabilityRequest req) {
+        log.info("Starting getAvailableScheduleHoursUseCase for date: {}", req.getDate());
+        long startTime = System.currentTimeMillis();
+
         List<VetWorkingSchedule> vetSchedules = vetsClient.getDayWorkingSchedules(req.getDate());
         SearchAvailabilityRequest searchAvailabilityRequest = mapper.toSearchAvailabilityRequest(req, vetSchedules);
         List<SearchAvailabilityResponse> response = apptsClient.searchAvailability(searchAvailabilityRequest);
+
+        String message = "Completed getAvailableScheduleHoursUseCase in {} ms. Found {} available slots.";
+        long executionTime = System.currentTimeMillis() - startTime;
+        log.info(message, executionTime, response.size());
+
         return response;
     }
 }
