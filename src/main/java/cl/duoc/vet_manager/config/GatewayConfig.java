@@ -14,6 +14,7 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 import static org.springframework.web.servlet.function.RequestPredicates.path;
 
 import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.function.HandlerFilterFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
+@Slf4j
 @Configuration
 public class GatewayConfig {
 
@@ -69,28 +71,24 @@ public class GatewayConfig {
     }
 
     private HandlerFilterFunction<ServerResponse, ServerResponse> getRoutingFilter(String url) {
-        if (isLocalURL(url)) {
-            return uri(url);
-        } else {
-            String serviceId = url.replaceFirst("^https?://", "");
-            return lb(serviceId);
-        }
+        log.info("Routing URL: '{}'", url);
+        return isLocalURL(url) ? uri(url) : lb(URI.create(url).getHost());
     }
 
     private boolean isLocalURL(String url) {
         if (url == null || url.isBlank()) {
-            return false;
+            throw new IllegalArgumentException("Missing domain service url");
         }
-
         try {
             String host = URI.create(url).getHost();
             return host != null
+                    && (!url.startsWith("lb://"))
                     && (host.equalsIgnoreCase("localhost")
                             || host.equals("127.0.0.1")
                             || host.equals("[::1]")
                             || host.equals("0:0:0:0:0:0:0:1"));
         } catch (IllegalArgumentException err) {
-            return false;
+            throw new IllegalArgumentException("Bad domain service url: " + url);
         }
     }
 }

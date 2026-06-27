@@ -133,12 +133,13 @@ public class RestClientConfig {
         try {
             String host = URI.create(url).getHost();
             return host != null
+                    && (!url.startsWith("lb://"))
                     && (host.equalsIgnoreCase("localhost")
                             || host.equals("127.0.0.1")
                             || host.equals("[::1]")
                             || host.equals("0:0:0:0:0:0:0:1"));
         } catch (IllegalArgumentException err) {
-            return false;
+            throw new IllegalArgumentException("Bad domain service url: " + url);
         }
     }
 }
